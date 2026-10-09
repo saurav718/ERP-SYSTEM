@@ -2,7 +2,26 @@
   "name": "industrialflow-erp",
   "version": "1.0.0",
   "private": true,
-  "workspaces": ["backend", "frontend"],
+  "description": "IndustrialFlow is a deliberately focused PERN ERP for a manufacturing and supply business. It demonstrates a traceable order lifecycle rather than broad, shallow CRUD:",
+  "homepage": "https://github.com/rajesh-kumar-pradhan/ERP-SYSTEM#readme",
+  "bugs": {
+    "url": "https://github.com/rajesh-kumar-pradhan/ERP-SYSTEM/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rajesh-kumar-pradhan/ERP-SYSTEM.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
   "scripts": {
     "dev": "npm run dev --workspace=backend & npm run dev --workspace=frontend",
     "dev:backend": "npm run dev --workspace=backend",
@@ -14,4 +33,3 @@
     "prisma:seed": "npm run prisma:seed --workspace=backend"
   }
 }
-

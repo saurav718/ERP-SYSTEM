@@ -18,8 +18,8 @@ async function seed() {
   const passwordHash = await bcrypt.hash('IndustrialFlow@123', 12);
   const admin = await prisma.user.upsert({
     where: { email: 'admin@industrialflow.local' },
-    update: { name: 'Raj', role: 'ADMIN', passwordHash },
-    create: { name: 'Raj', email: 'admin@industrialflow.local', passwordHash, role: 'ADMIN' },
+    update: { name: 'Saurav', role: 'ADMIN', passwordHash },
+    create: { name: 'Saurav', email: 'admin@industrialflow.local', passwordHash, role: 'ADMIN' },
   });
   const sales = await prisma.user.upsert({
     where: { email: 'sales@industrialflow.local' },
@@ -70,10 +70,12 @@ async function seed() {
       quotationNumber: 'QT-DEMO-001', enquiryId: enquiry.id, customerId: customer.id,
       validUntil: new Date('2026-11-01'), subtotal: '185200.00', discountAmount: '9260.00',
       gstAmount: '31669.20', grandTotal: '207609.20', createdById: sales.id,
-      items: { create: [
-        { productId: pump.id, quantity: 2, unitPrice: '48500.00', discountPercent: '5.00', gstPercent: '18.00', baseAmount: '97000.00', discountAmount: '4850.00', taxableAmount: '92150.00', gstAmount: '16587.00', lineAmount: '108737.00' },
-        { productId: valve.id, quantity: 12, unitPrice: '7350.00', discountPercent: '5.00', gstPercent: '18.00', baseAmount: '88200.00', discountAmount: '4410.00', taxableAmount: '83790.00', gstAmount: '15082.20', lineAmount: '98872.20' },
-      ] },
+      items: {
+        create: [
+          { productId: pump.id, quantity: 2, unitPrice: '48500.00', discountPercent: '5.00', gstPercent: '18.00', baseAmount: '97000.00', discountAmount: '4850.00', taxableAmount: '92150.00', gstAmount: '16587.00', lineAmount: '108737.00' },
+          { productId: valve.id, quantity: 12, unitPrice: '7350.00', discountPercent: '5.00', gstPercent: '18.00', baseAmount: '88200.00', discountAmount: '4410.00', taxableAmount: '83790.00', gstAmount: '15082.20', lineAmount: '98872.20' },
+        ]
+      },
     },
   });
   console.log('Seed complete: 2 users, 8 products/inventory records, 3 customers, and a draft demo quotation.');
