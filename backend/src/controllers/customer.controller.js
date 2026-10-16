@@ -10,8 +10,5 @@ export async function customerlist(_req, res) {
   res.json({ success: true, data: serialize(await customerService.listCustomers()) });
 }
 
-export async function removecustomer(req, res) {
-  await customerService.deleteCustomer(req.params.id, req.user.id);
-  res.status(204).end();
-}
+
 
