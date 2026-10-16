@@ -6,8 +6,7 @@ import { AppError } from '../utils/app-error.js';
 import { audit } from './audit.service.js';
 
 export async function login({ email, password }) {
-  const user = await prisma.user.findUnique({ where: { email } })
-    || await prisma.user.findFirst({ where: { email: { equals: email, mode: 'insensitive' } } });
+  const user = await prisma.user.findFirst({ where: { email: { equals: email } } });
   const valid = user && await bcrypt.compare(password, user.passwordHash);
   if (!valid) throw new AppError('Invalid email or password', 401, 'UNAUTHORIZED');
   const token = jwt.sign({ role: user.role }, env.jwtSecret, { subject: user.id, expiresIn: env.jwtExpiresIn });
