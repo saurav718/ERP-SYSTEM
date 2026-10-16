@@ -3,7 +3,7 @@ import request from 'supertest';
 import bcrypt from 'bcrypt';
 
 // These are real API/database tests. They deliberately require a separate database:
-// TEST_DATABASE_URL=.../industrialflow_test npm test. They never reset erp_system.
+// TEST_DATABASE_URL=.../ErpMgmt_test npm test. They never reset erp_system.
 const databaseUrl = process.env.TEST_DATABASE_URL;
 const describeDatabase = databaseUrl ? describe : describe.skip;
 let prisma; let app; let adminToken; let salesToken; let admin; let sales; let customer; let product;
@@ -17,14 +17,14 @@ describeDatabase('ERP workflow integration', () => {
   });
   beforeEach(async () => {
     await prisma.auditLog.deleteMany(); await prisma.inventoryMovement.deleteMany(); await prisma.dispatchItem.deleteMany(); await prisma.dispatch.deleteMany(); await prisma.salesOrderItem.deleteMany(); await prisma.salesOrder.deleteMany(); await prisma.quotationItem.deleteMany(); await prisma.quotation.deleteMany(); await prisma.enquiryItem.deleteMany(); await prisma.enquiry.deleteMany(); await prisma.inventory.deleteMany(); await prisma.product.deleteMany(); await prisma.customer.deleteMany(); await prisma.user.deleteMany();
-    const hash = await bcrypt.hash('IndustrialFlow@123', 4);
+    const hash = await bcrypt.hash('ErpMgmt@123', 4);
     admin = await prisma.user.create({ data: { name: 'Admin', email: 'admin@test.local', passwordHash: hash, role: 'ADMIN' } });
     sales = await prisma.user.create({ data: { name: 'Sales', email: 'sales@test.local', passwordHash: hash, role: 'SALES_USER' } });
     customer = await prisma.customer.create({ data: { companyName: 'Test Fabrication', contactPerson: 'Person', mobile: '9999999999', email: 'customer@test.local', city: 'Pune' } });
     product = await prisma.product.create({ data: { productCode: 'TEST-001', name: 'Test Pump', category: 'Test', unit: 'Nos', basePrice: '100.00' } });
     await prisma.inventory.create({ data: { productId: product.id, physicalQuantity: 10, reservedQuantity: 0 } });
-    adminToken = (await request(app).post('/api/auth/login').send({ email: admin.email, password: 'IndustrialFlow@123' })).body.data.token;
-    salesToken = (await request(app).post('/api/auth/login').send({ email: sales.email, password: 'IndustrialFlow@123' })).body.data.token;
+    adminToken = (await request(app).post('/api/auth/login').send({ email: admin.email, password: 'ErpMgmt@123' })).body.data.token;
+    salesToken = (await request(app).post('/api/auth/login').send({ email: sales.email, password: 'ErpMgmt@123' })).body.data.token;
   });
   afterAll(async () => prisma?.$disconnect());
 

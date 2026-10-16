@@ -1,4 +1,4 @@
-# IndustrialFlow API
+# ErpMgmt API
 
 Base URL: `http://localhost:4000/api` (or the frontend `VITE_API_URL`). Protected calls use `Authorization: Bearer <JWT>`.
 
@@ -15,7 +15,7 @@ Both authenticated roles can view shared business records and inventory availabi
 Public. Authenticates a seeded or managed user and records a `LOGIN` audit event.
 
 ```json
-{ "email": "sales@industrialflow.local", "password": "IndustrialFlow@123" }
+{ "email": "sales@erpmgmt.local", "password": "ErpMgmt@123" }
 ```
 
 Returns a JWT and safe user object; password hashes are never returned. Invalid credentials return `401 UNAUTHORIZED` with a deliberately generic message.
@@ -185,4 +185,3 @@ JWT required; `ADMIN` only. Returns up to 200 newest significant business audit 
 ### `GET /health`
 
 Public. Returns `{ "success": true, "data": { "status": "ok" } }`. This is process health, not a replacement for a database readiness probe.
-

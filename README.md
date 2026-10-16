@@ -1,161 +1,314 @@
-# IndustrialFlow
+ERP Management System
 
-IndustrialFlow is a deliberately focused PERN ERP for a manufacturing and supply business. It demonstrates a traceable order lifecycle rather than broad, shallow CRUD:
+A full-stack ERP application built with the PERN stack (PostgreSQL,
+Express.js, React.js, and Node.js). The project models a business
+workflow from customer enquiry to quotation, sales order, inventory
+reservation, and dispatch.
 
-`Customer → Enquiry → Quotation → Accepted quotation → Sales order → Reservation → Confirmed order → Dispatch`
+Note: Update the setup commands, environment variable names, API
+routes, and feature list below to match the implementation in this
+repository before submitting it.
 
-The project is designed for discussion in a full-stack evaluation: PostgreSQL owns critical data invariants, server-side services own business rules, and the React UI is a practical client of that API.
+Features
 
-## Architecture
+Authentication and authorization --- JWT-based authentication,
+protected routes, and role-based access for Admin and Sales User
+roles.
 
-| Layer | Responsibility |
-| --- | --- |
-| `frontend/` | Vite + React workflow UI, React Router, centralized Axios/JWT client |
-| `backend/src/routes` | Endpoint mapping and access middleware |
-| `backend/src/controllers` | HTTP request/response translation only |
-| `backend/src/services` | Financial calculations, state transitions, transactional operations |
-| `backend/prisma` | PostgreSQL schema, migration, idempotent seed |
+Customer enquiries --- Create and manage customer enquiries
+containing one or more products.
 
-Important application layers are intentionally few. For example, quotation math belongs in `financial.service.js`, while state transition policy belongs in `state-machine.service.js`; neither is duplicated in React or controllers.
+Product and inventory management --- Maintain product details
+and physical/reserved stock quantities.
 
-## Project layout
+Quotations --- Create quotations with item quantities, unit
+prices, discounts, GST, and totals.
 
-```text
-.
-├── backend/
-│   ├── prisma/                 # schema, deployable migration, seed data
-│   ├── src/{config,controllers,lib,middleware,routes,services,utils,validators}/
-│   └── tests/                  # unit tests + opt-in real DB integration tests
-├── frontend/src/{api,auth,components,pages}/
-├── docs/{API.md,ER-DIG.md}
-└── postman/IndustrialFlow.postman_collection.json
-```
+Sales orders --- Convert eligible accepted quotations into sales
+orders.
 
-## Database and business design
+Inventory reservation --- Check available stock and prevent
+reservations beyond available inventory.
 
-The full entity graph is in [docs/ER-DIG.md](docs/ER-DIG.md). Core records are normalized: users, customers, products, inventory, enquiries/items, quotations/items, sales orders/items, dispatches/items, inventory movements, and audit logs.
+Dispatch management --- Record dispatch details and update
+inventory quantities.
 
-PostgreSQL constraints are part of the design, not a fallback:
+REST API --- Backend endpoints for application workflows.
 
-- Unique business identifiers: product code, enquiry number, quotation number, order number, dispatch number.
-- One inventory row per product, one sales order per quotation, and one dispatch per order.
-- Foreign keys with appropriate `RESTRICT`, `CASCADE`, and `SET NULL` behavior.
-- Checks for positive line quantities, non-negative pricing/totals, percentages from 0–100, and `0 ≤ reserved_quantity ≤ physical_quantity`.
-- Indexes for status/customer timelines, product movement history, references, and audit lookup.
+Validation and error handling --- Validate requests and handle
+expected application errors.
 
-### Quotation finance
+Technology Stack
 
-The browser submits item inputs, never an authoritative total. The backend uses Prisma `Decimal` and rounds stored monetary amounts to two decimals (`ROUND_HALF_UP`):
+Frontend
 
-```text
-base     = quantity × unit price
-discount = base × discount % / 100
-taxable  = base - discount
-GST      = taxable × GST % / 100
-line     = taxable + GST
-total    = sum(line)
-```
+React.js
 
-It retains each calculation component on the quotation item so a historical quote remains explainable even if product base prices change later.
+JavaScript
 
-### State and idempotency
+[Add the UI library or CSS framework used in this project]
 
-- Quotation: `DRAFT → SENT → ACCEPTED | REJECTED`.
-- Sales order: `PENDING → CONFIRMED → DISPATCHED`; `PENDING → CANCELLED` is intentionally represented as an explicit future-safe transition, but no cancellation endpoint is exposed yet.
-- Conversion locks the quotation and has both a service check and a database-unique `quotation_id`. A repeated request returns `DUPLICATE_OPERATION` and cannot create a second order.
-- Confirmation locks the order; a repeated confirmation returns `DUPLICATE_OPERATION`.
-- Dispatch locks the order and has a unique `dispatch.sales_order_id`; a repeated request returns `DUPLICATE_OPERATION`.
+[Add the routing/data-fetching libraries used in this project]
 
-### Inventory, movements, and concurrency
+Backend
 
-Availability is derived, never stored: `physicalQuantity - reservedQuantity`.
+Node.js
 
-Confirming an order runs in a PostgreSQL serializable transaction. It locks the order and all involved inventory rows with `SELECT … FOR UPDATE`, in sorted product-ID order. A concurrent confirmation requiring the same stock waits on the row lock; after the first commits, the second reads the current reserved balance and fails cleanly if insufficient. PostgreSQL can instead issue its valid serializable-retry signal (`40001`); the service retries the complete transaction up to three times before it ever reaches the client. It cannot produce an invalid `reserved > physical` state; the database check constraint remains a final guard.
+Express.js
 
-Reservation creates `RESERVATION` movement rows but does not change physical stock. Dispatch creates one `DISPATCH` movement per order item and atomically decrements both physical and reserved stock. Admin stock receipts create `STOCK_RECEIPT` movements. The ledger records product, type, quantity, business reference, actor, and timestamp, so there are no artificial “available stock” edits to explain.
+JWT authentication
 
-`audit_logs` records important events only: login, enquiry/quotation creation, quotation status actions, conversion, receipt, reservation/confirmation, and dispatch. It never stores a password, password hash, or JWT.
+Password hashing with [bcrypt/bcryptjs, if used]
 
-## Setup
+Database
 
-Prerequisites: Node 22+, npm 10+, PostgreSQL 18+.
+PostgreSQL
 
-```bash
-cp backend/.env.example backend/.env
-cp frontend/.env.example frontend/.env
-# edit backend/.env with the real local PostgreSQL password and a long JWT secret
+[Add the ORM/query builder used: Prisma, Sequelize, Drizzle, Knex,
+or SQL queries]
+
+Testing
+
+[Add the testing framework used, such as Jest, Vitest, or
+Supertest]
+
+Project Structure
+
+The exact structure may differ in this repository. A common layout is:
+
+project-root/
+├── client/             # React frontend
+├── server/             # Express backend
+├── README.md
+└── package.json        # Optional root scripts
+
+Prerequisites
+
+Install the following before running the project:
+
+Node.js (LTS recommended)
+
+npm
+
+PostgreSQL
+
+Git
+
+Getting Started
+
+1. Clone the repository
+
+git clone <YOUR_REPOSITORY_URL>
+cd <YOUR_PROJECT_DIRECTORY>
+
+1. Install dependencies
+
+If the frontend and backend are separate applications, install
+dependencies in each folder:
+
+cd client
 npm install
-npm run prisma:generate
-npm run prisma:migrate --workspace=backend -- --name initial_erp
-# Or, when using the committed migration on a clean/managed database:
-npm run prisma:deploy --workspace=backend
-npm run prisma:seed
-npm run dev:backend
-npm run dev:frontend
-```
+cd ../server
+npm install
 
-The default endpoints are API `http://localhost:4000` and UI `http://localhost:5173`. `DATABASE_URL` exists only in `backend/.env`; it is never used by the Vite client.
+If your project uses different folder names, replace client and
+server with the correct paths.
 
-For this local database, set:
+1. Configure environment variables
 
-```dotenv
-DATABASE_URL="postgresql://postgres:YOUR_REAL_PASSWORD@localhost:5432/erp_system?schema=public"
-JWT_SECRET="a-long-random-secret-at-least-32-characters"
-```
+Create a .env file in the backend directory. Use the variable names
+expected by your code.
 
-Use `prisma migrate deploy` for a production-like/CI deployment. `prisma migrate dev` is for local migration authoring. The migration does not drop or reset a database.
+Example only:
 
-## Seed credentials
+PORT=5000
+DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@localhost:5432/erp_db
+JWT_SECRET=replace_with_a_long_random_secret
+NODE_ENV=development
 
-| Role | Email | Password |
-| --- | --- | --- |
-| ADMIN | `admin@industrialflow.local` | `IndustrialFlow@123` |
-| SALES_USER | `sales@industrialflow.local` | `IndustrialFlow@123` |
+If the frontend needs a backend URL, create its environment file using
+the variable name expected by your frontend build tool. For Vite, a
+variable exposed to browser code commonly starts with VITE_:
 
-The seed is idempotent and creates the two accounts, eight industrial products with inventory, three customers, and a draft demo enquiry/quotation. Admins can also add catalog products with opening stock from Inventory Control. Replace the demonstration password in a real deployment.
+VITE_API_BASE_URL=<http://localhost:5000>
 
-## Testing
+Important: These are example variable names. Check the source code
+and existing environment examples for the exact names required. Never
+commit real passwords, API keys, or JWT secrets.
 
-```bash
-# Always-safe unit tests (financial calculation and state policy)
+1. Create the PostgreSQL database
+
+Open PostgreSQL using psql or a database client and create a database:
+
+CREATE DATABASE erp_db;
+
+Then configure the connection string in the backend .env file.
+
+1. Run migrations and seed data
+
+Use the commands for the ORM or database tooling actually configured in
+this project.
+
+Examples (do not run unless they match your setup):
+
+# Prisma example
+
+npx prisma migrate dev
+npx prisma db seed
+
+If the project uses SQL scripts, Sequelize, Drizzle, Knex, or another
+tool, replace these commands with the appropriate migration and seed
+instructions.
+
+1. Start the backend
+
+From the backend directory, run the script defined in
+server/package.json. Common examples are:
+
+npm run dev
+
+or:
+
+npm start
+
+1. Start the frontend
+
+Open a second terminal and run:
+
+cd client
+npm run dev
+
+Open the local URL printed by the frontend development server in your
+browser.
+
+Business Workflow
+
+The intended workflow is:
+
+Sign in with an authorized account.
+
+Create a customer enquiry and add requested products.
+
+Prepare a quotation with item pricing, discount, and GST.
+
+Mark the quotation as accepted or rejected.
+
+Convert an accepted quotation into a sales order.
+
+Confirm the order and reserve available inventory.
+
+Dispatch the order and update physical and reserved stock.
+
+Inventory calculation
+
+Available Quantity = Physical Quantity - Reserved Quantity
+
+For example, if physical stock is 200 and reserved stock is 60,
+available stock is 140.
+
+Inventory reservation and dispatch operations should be validated by the
+backend and protected against duplicate or concurrent operations.
+
+API Documentation
+
+Document the actual endpoints supported by this project here. Example
+routes for this type of application may include:
+
+Method                  Endpoint                       Purpose
+
+POST                    /auth/login                  Authenticate a user
+
+POST                    /enquiries                   Create an enquiry
+
+GET                     /enquiries                   List enquiries
+
+POST                    /quotations                  Create a quotation
+
+PATCH                   /quotations/:id/status       Update quotation status
+
+POST                    /quotations/:id/convert      Convert an accepted
+quotation to a sales
+order
+
+GET                     /sales-orders                List sales orders
+
+POST                    /sales-orders/:id/confirm    Confirm an order and
+reserve stock
+
+These routes are illustrative. Replace them with the actual routes
+from your backend. If available, add a link to your Postman collection
+or Swagger/OpenAPI documentation.
+
+Running Tests
+
+Run the test command configured in the relevant package.json. For
+example:
+
 npm test
 
-# Full integration suite against a separately migrated test DB only
-TEST_DATABASE_URL="postgresql://postgres:password@localhost:5432/industrialflow_test?schema=public" npm test
-```
+Update this section with the exact command and test framework used by
+the project.
 
-The integration suite never falls back to `erp_system`; it is skipped unless `TEST_DATABASE_URL` is supplied. After creating and migrating `industrialflow_test`, the automated coverage includes:
+Recommended tests include:
 
-1. Quotation discount, GST, and grand-total calculation (`financial.service.test.js`).
-2. Draft and rejected quotations cannot be converted into sales orders (`workflow.integration.test.js`).
-3. A quotation cannot create duplicate sales orders (`workflow.integration.test.js`).
-4. An order cannot reserve more than available inventory (`workflow.integration.test.js`).
-5. A Sales User cannot perform Admin-only order confirmation (`workflow.integration.test.js`).
-6. Bonus: concurrent reservations cannot oversubscribe stock; concurrent requests that fit may both succeed (`workflow.integration.test.js`).
-7. Enquiries move to `QUOTED`/`LOST` correctly, and a lost enquiry cannot receive a quotation (`workflow.integration.test.js`).
-8. Admin cancellation of pending and confirmed orders; confirmed-order cancellation releases reservations without decreasing physical stock (`workflow.integration.test.js`).
+Quotation totals are calculated correctly.
 
-The integration tests use only the separate `industrialflow_test` database, avoiding any accidental reset of development data.
+Draft or rejected quotations cannot be converted into sales orders.
 
-## API, UI, and Postman
+One quotation cannot create duplicate sales orders.
 
-- API details and error rules: [docs/API.md](docs/API.md)
-- Mermaid ER diagram: [docs/ER-DIG.md](docs/ER-DIG.md)
-- Import [postman/IndustrialFlow.postman_collection.json](postman/IndustrialFlow.postman_collection.json) and set `baseUrl`; the Login request stores `token` automatically.
+Inventory reservations cannot exceed available stock.
 
-The UI includes Login, Overview, Enquiries (including customer creation), Quotations, Sales Orders, and Inventory. Navigation and actions adapt to role for usability; the backend independently enforces every restricted action.
+Unauthorized users cannot perform restricted operations.
 
-## Assumptions and trade-offs
+Concurrent reservations cannot oversell inventory.
 
-- Each order is dispatched in full once. This keeps the required `CONFIRMED → DISPATCHED` workflow clear; `dispatch_items` is already modeled so partial deliveries can be introduced later without denormalizing data.
-- Admins can cancel pending or confirmed orders. Cancelling a confirmed order releases reserved quantities, records `RESERVATION_RELEASE` movements, and leaves physical stock unchanged, all atomically. Dispatched orders cannot be cancelled.
-- Damaged stock is not modeled prematurely. Adding `damaged_quantity` and extending the availability calculation to `physical - reserved - damaged`, plus a movement type, does not require rewriting documents, audit, or reservation logic.
-- Document numbers are timestamp/entropy strings and protected by unique constraints. They are suitable for the evaluation; a future legal numbering sequence can be added as a small database-backed allocator.
+Demo Credentials
 
-## Verification notes
+Add development/demo credentials here only if you have configured them:
 
-`npm run build` builds both backend (Prisma client generation) and frontend. Backend startup validates `DATABASE_URL` and `JWT_SECRET` rather than silently running with unsafe configuration. The API returns a stable failure envelope such as `{ "success": false, "message": "Insufficient inventory", "code": "INSUFFICIENT_STOCK" }` and never returns stack traces to clients.
+Role         Email            Password
 
-## Git
+Admin        Add demo email   Add demo password
+Sales User   Add demo email   Add demo password
 
-The repository uses phase-based commits to keep its development history reviewable. Inspect history with `git log --oneline --decorate`; check pending work with `git status`. Keep each commit focused on one workflow phase (schema, APIs/business rules, UI, tests, or documentation), and push each completed phase. Do not commit generated archives, build output, or environment files.
+Do not publish real user credentials or production passwords.
+
+Screenshots and Demo
+
+Add screenshots or a short demo video link here:
+
+Application screenshots: <ADD_SCREENSHOT_LINKS>
+
+Demo video: <ADD_DEMO_VIDEO_LINK>
+
+Security Notes
+
+Keep .env files out of version control.
+
+Store passwords as hashes, never as plain text.
+
+Validate and authorize sensitive operations on the backend.
+
+Use database transactions for workflows that must update multiple
+related records atomically.
+
+Do not trust prices, totals, roles, or inventory values sent by the
+frontend without server-side validation.
+
+Contributing
+
+Create a feature branch.
+
+Make focused changes.
+
+Run tests and check the application locally.
+
+Commit your changes with clear messages.
+
+Open a pull request describing the changes.
+
+License
+
+No license has been specified. Add a LICENSE file and update this
+section if you intend to publish the project under a particular license.

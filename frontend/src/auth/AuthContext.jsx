@@ -8,7 +8,7 @@ export function AuthProvider({ children }) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem('industrialflow_token');
+    const token = localStorage.getItem('ErpMgmt_token');
 
     if (!token) {
       setReady(true);
@@ -18,18 +18,18 @@ export function AuthProvider({ children }) {
     api
       .get('/auth/me')
       .then(({ data }) => setUser(data.data))
-      .catch(() => localStorage.removeItem('industrialflow_token'))
+      .catch(() => localStorage.removeItem('ErpMgmt_token'))
       .finally(() => setReady(true));
   }, []);
 
   async function login(email, password) {
     const { data } = await api.post('/auth/login', { email, password });
-    localStorage.setItem('industrialflow_token', data.data.token);
+    localStorage.setItem('ErpMgmt_token', data.data.token);
     setUser(data.data.user);
   }
 
   function logout() {
-    localStorage.removeItem('industrialflow_token');
+    localStorage.removeItem('ErpMgmt_token');
     setUser(null);
   }
 

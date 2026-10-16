@@ -35,7 +35,7 @@ export default function LoginPage() {
           <div className="brand-mark large">IF</div>
           <div>
             <p className="eyebrow light">Manufacturing & supply ERP</p>
-            <h1>IndustrialFlow</h1>
+            <h1>ErpMgmt</h1>
           </div>
         </div>
         <div className="login-visual-copy">
@@ -63,7 +63,7 @@ export default function LoginPage() {
             <input
               type="email"
               value={email}
-              placeholder="sales@industrialflow.local"
+              placeholder="sales@erpmgmt.local"
               onChange={(e) => setEmail(e.target.value)}
               required
             />
@@ -74,7 +74,7 @@ export default function LoginPage() {
             <input
               type="password"
               value={password}
-              placeholder="IndustrialFlow@123"
+              placeholder="ErpMgmt@123"
               onChange={(e) => setPassword(e.target.value)}
               required
             />
@@ -86,9 +86,9 @@ export default function LoginPage() {
         </form>
 
         <div className="login-meta">
-          <span>Demo user: sales@industrialflow.local</span>
-          <span>Admin user: admin@industrialflow.local</span>
-          <span>Password: IndustrialFlow@123</span>
+          <span>Demo user: sales@erpmgmt.local</span>
+          <span>Admin user: admin@erpmgmt.local</span>
+          <span>Password: ErpMgmt@123</span>
         </div>
       </section>
     </main>

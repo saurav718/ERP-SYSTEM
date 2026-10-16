@@ -1,4 +1,4 @@
--- IndustrialFlow's schema deliberately keeps stock balances, movements, and business
+-- ErpMgmt's schema deliberately keeps stock balances, movements, and business
 -- documents separate. The check constraints below are database-enforced invariants.
 
 CREATE TYPE "UserRole" AS ENUM ('ADMIN', 'SALES_USER');

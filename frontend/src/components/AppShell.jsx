@@ -5,7 +5,7 @@ import { useAuth } from '../auth/AuthContext.jsx';
 export default function AppShell() {
   const { user, ready, logout } = useAuth();
 
-  if (!ready) return <div className="screen-center">Loading IndustrialFlow…</div>;
+  if (!ready) return <div className="screen-center">Loading ErpMgmt…</div>;
   if (!user) return <Navigate to="/login" replace />;
 
   const isAdmin = user.role === 'ADMIN';
@@ -27,10 +27,10 @@ export default function AppShell() {
   return (
     <div className={`app-shell ${isAdmin ? 'role-admin' : 'role-sales'}`}>
       <aside className="sidebar">
-        <Link className="brand-block" to="/dashboard" aria-label="IndustrialFlow home">
+        <Link className="brand-block" to="/dashboard" aria-label="ErpMgmt home">
           <div className="brand-mark">IF</div>
           <div className="brand-copy">
-            <strong>IndustrialFlow</strong>
+            <strong>ErpMgmt</strong>
             <small>Manufacturing ERP</small>
           </div>
         </Link>

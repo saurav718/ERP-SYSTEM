@@ -14,18 +14,24 @@ const products = [
   { productCode: 'CSV-DN50', name: 'Carbon Steel Ball Valve DN50', category: 'Valves', unit: 'Nos', basePrice: '8400.00', quantity: 40 },
 ];
 
+async function upsertDemoUser({ email, name, role, passwordHash }) {
+
+  const existing = await prisma.user.findFirst({
+    where: { email: { equals: email, mode: 'insensitive' } },
+    select: { id: true },
+  });
+
+  const data = { name, email, role, passwordHash };
+
+  if (existing) return prisma.user.update({ where: { id: existing.id }, data });
+
+  return prisma.user.create({ data });
+}
+
 async function seed() {
-  const passwordHash = await bcrypt.hash('IndustrialFlow@123', 12);
-  const admin = await prisma.user.upsert({
-    where: { email: 'admin@industrialflow.local' },
-    update: { name: 'Saurav', role: 'ADMIN', passwordHash },
-    create: { name: 'Saurav', email: 'admin@industrialflow.local', passwordHash, role: 'ADMIN' },
-  });
-  const sales = await prisma.user.upsert({
-    where: { email: 'sales@industrialflow.local' },
-    update: { name: 'Anupam Sales', role: 'SALES_USER', passwordHash },
-    create: { name: 'Anupam Sales', email: 'sales@industrialflow.local', passwordHash, role: 'SALES_USER' },
-  });
+  const passwordHash = await bcrypt.hash('ErpMgmt@123', 12);
+  const admin = await upsertDemoUser({ name: 'Saurav', email: 'admin@erpmgmt.local', role: 'ADMIN', passwordHash });
+  const sales = await upsertDemoUser({ name: 'Anupam Sales', email: 'sales@erpmgmt.local', role: 'SALES_USER', passwordHash });
 
   for (const item of products) {
     const product = await prisma.product.upsert({
@@ -85,4 +91,3 @@ seed().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 }).finally(() => prisma.$disconnect());
-

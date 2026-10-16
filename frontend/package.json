@@ -1,5 +1,5 @@
 {
-  "name": "industrialflow-frontend",
+  "name": "ErpMgmt-frontend",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -19,4 +19,3 @@
     "vite": "^7.1.3"
   }
 }
-

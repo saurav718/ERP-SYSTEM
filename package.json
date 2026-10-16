@@ -1,8 +1,8 @@
 {
-  "name": "industrialflow-erp",
+  "name": "ErpMgmt-erp",
   "version": "1.0.0",
   "private": true,
-  "description": "IndustrialFlow is a deliberately focused PERN ERP for a manufacturing and supply business. It demonstrates a traceable order lifecycle rather than broad, shallow CRUD:",
+  "description": "ErpMgmt is a deliberately focused PERN ERP for a manufacturing and supply business. It demonstrates a traceable order lifecycle rather than broad, shallow CRUD:",
   "homepage": "https://github.com/rajesh-kumar-pradhan/ERP-SYSTEM#readme",
   "bugs": {
     "url": "https://github.com/rajesh-kumar-pradhan/ERP-SYSTEM/issues"
